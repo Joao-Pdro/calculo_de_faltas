@@ -70,19 +70,38 @@
             </select>
           </label>
           <label>Horário de início <input type="time" name="inicio" required /></label>
+          <label>Horário de fim <input type="time" name="fim" required /></label>
           <button type="submit">Adicionar horário</button>
         </form>
       </section>
 
       <section>
-        <h2>4) Registrar falta</h2>
+        <h2>4) Agenda por dia (montagem do calendário)</h2>
+        {{range .Agenda}}
+        <div class="agenda-dia">
+          <h3>{{.Data}} ({{.DiaSemana}})</h3>
+          {{if .SemHorario}}
+          <p>Sem horários cadastrados.</p>
+          {{else}}
+          <ul>
+            {{range .Horarios}}
+            <li>{{.Inicio}}-{{.Fim}} | {{.MateriaNome}} - {{.Professor}} ({{.TipoAula}})</li>
+            {{end}}
+          </ul>
+          {{end}}
+        </div>
+        {{end}}
+      </section>
+
+      <section>
+        <h2>5) Registrar falta</h2>
         <form method="post" action="/faltas" class="grid-form">
           <label>
             Horário de aula
             <select name="horario_id" required>
               <option value="">Selecione</option>
               {{range .Horarios}}
-              <option value="{{.ID}}">{{.MateriaNome}} - {{.Professor}} ({{.Inicio}}, {{.TipoAula}})</option>
+              <option value="{{.ID}}">{{.AulaData}} {{.Inicio}}-{{.Fim}} | {{.MateriaNome}} - {{.Professor}} ({{.TipoAula}})</option>
               {{end}}
             </select>
           </label>
