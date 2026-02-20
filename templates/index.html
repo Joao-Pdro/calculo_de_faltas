@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Controle de Faltas</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Controle de Faltas</h1>
+      {{if .Mensagem}}<p class="flash">{{.Mensagem}}</p>{{end}}
+
+      <section>
+        <h2>1) Cadastrar Matéria</h2>
+        <form method="post" action="/materias" class="grid-form">
+          <label>Nome da matéria <input type="text" name="nome" required /></label>
+          <label>Professor <input type="text" name="professor" required /></label>
+          <button type="submit">Salvar matéria</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>2) Calendário de Aulas (recorrência)</h2>
+        <form method="post" action="/aulas/recorrencia" class="grid-form">
+          <label>Data de início <input type="date" name="data_inicio" required /></label>
+          <label>
+            Dia da semana
+            <select name="dia_semana">
+              <option value="1">Segunda</option>
+              <option value="2">Terça</option>
+              <option value="3">Quarta</option>
+              <option value="4">Quinta</option>
+              <option value="5">Sexta</option>
+              <option value="6">Sábado</option>
+              <option value="0">Domingo</option>
+            </select>
+          </label>
+          <label>Quantidade de semanas <input type="number" min="1" name="semanas" value="1" /></label>
+          <button type="submit">Aplicar recorrência</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>3) Cadastrar horário em um dia de aula</h2>
+        <form method="post" action="/horarios" class="grid-form">
+          <label>
+            Dia de aula
+            <select name="aula_id" required>
+              <option value="">Selecione</option>
+              {{range .Aulas}}
+              <option value="{{.ID}}">{{.Data.Format "2006-01-02"}} ({{.DiaSemana}})</option>
+              {{end}}
+            </select>
+          </label>
+          <label>
+            Matéria
+            <select name="materia_id" required>
+              <option value="">Selecione</option>
+              {{range .Materias}}
+              <option value="{{.ID}}">{{.Nome}} - {{.Professor}}</option>
+              {{end}}
+            </select>
+          </label>
+          <label>
+            Tipo
+            <select name="tipo_aula">
+              <option value="teorica">Teórica</option>
+              <option value="pratica">Prática</option>
+            </select>
+          </label>
+          <label>Horário de início <input type="time" name="inicio" required /></label>
+          <label>Duração (min) <input type="number" name="duracao_min" min="1" value="50" /></label>
+          <button type="submit">Adicionar horário</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>4) Agenda por dia (montagem do calendário)</h2>
+        {{range .Agenda}}
+        <div class="agenda-dia">
+          <h3>{{.Data}} ({{.DiaSemana}})</h3>
+          {{if .SemHorario}}
+          <p>Sem horários cadastrados.</p>
+          {{else}}
+          <ul>
+            {{range .Horarios}}
+            <li>{{.Inicio}}-{{.Fim}} ({{.DuracaoMin}}min) | {{.MateriaNome}} - {{.Professor}} ({{.TipoAula}})</li>
+            {{end}}
+          </ul>
+          {{end}}
+        </div>
+        {{end}}
+      </section>
+
+      <section>
+        <h2>5) Registrar falta</h2>
+        <form method="post" action="/faltas" class="grid-form">
+          <label>
+            Horário de aula
+            <select name="horario_id" required>
+              <option value="">Selecione</option>
+              {{range .Horarios}}
+              <option value="{{.ID}}">{{.AulaData}} {{.Inicio}}-{{.Fim}} ({{.DuracaoMin}}min) | {{.MateriaNome}} - {{.Professor}} ({{.TipoAula}})</option>
+              {{end}}
+            </select>
+          </label>
+          <label>Data da falta <input type="date" name="data_falta" required /></label>
+          <label>Quantidade de horários perdidos <input type="number" min="1" name="horarios_perdidos" value="1" /></label>
+          <button type="submit">Salvar falta</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Resumo de faltas por matéria</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Matéria</th><th>Professor</th><th>Horários</th><th>Faltas</th><th>%</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .Resumo}}
+            <tr>
+              <td>{{.MateriaNome}}</td>
+              <td>{{.Professor}}</td>
+              <td>{{.TotalHorarios}}</td>
+              <td>{{.TotalFaltas}}</td>
+              <td>{{printf "%.1f" .Percentual}}%</td>
+              <td class="{{if .Reprovado}}reprovado{{else}}ok{{end}}">{{if .Reprovado}}BOMBA (>25%){{else}}Dentro do limite{{end}}</td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

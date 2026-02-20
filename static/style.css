@@ -1,0 +1,14 @@
+:root { font-family: Arial, sans-serif; }
+body { margin: 0; background: #f4f6fb; }
+main { max-width: 1000px; margin: 0 auto; padding: 1.5rem; }
+section { background: #fff; margin: 1rem 0; padding: 1rem; border-radius: 8px; }
+.grid-form { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: .8rem; align-items: end; }
+label { display:flex; flex-direction:column; gap:.3rem; }
+button { background:#2f65f5; color:#fff; border:none; border-radius:6px; padding:.6rem; cursor:pointer; }
+.flash { background:#e8f7e8; border:1px solid #4caf50; padding:.5rem; border-radius:4px; }
+.agenda-dia { border: 1px solid #e2e6f0; border-radius: 8px; padding: .6rem; margin-bottom: .6rem; }
+.agenda-dia h3 { margin: .2rem 0 .4rem 0; font-size: 1rem; }
+table { width:100%; border-collapse: collapse; }
+th,td { border:1px solid #ddd; padding:.4rem; }
+.ok { color:#0b7c28; font-weight:bold; }
+.reprovado { color:#a60d0d; font-weight:bold; }
