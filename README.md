@@ -1,18 +1,18 @@
-# Sistema de Controle de Faltas
+# Sistema de Controle de Faltas (Go)
 
-Aplicação web local para gerenciar matérias, horários de aula e faltas.
+Aplicação web local em Go com frontend em templates (`html/template`).
 
 ## Requisitos atendidos
 
-- Cadastro de várias matérias, incluindo matérias com mesmo nome e professores diferentes.
+- Cadastro de várias matérias, inclusive com o mesmo nome e professores diferentes.
 - Cadastro de horários em um dia de aula.
-- Calendário padrão criado automaticamente (semana atual) e possibilidade de recorrência por 1 dia/semana ou várias semanas.
-- Cálculo da porcentagem de faltas por matéria com regra de reprovação acima de 25%.
+- Calendário padrão inicial e recorrência configurável para 1 ou várias semanas.
+- Cálculo de porcentagem de faltas por matéria com reprovação acima de 25%.
 
 ## Rodar localmente
 
 ```bash
-python app.py
+go run main.go
 ```
 
 Acesse: http://localhost:8000
