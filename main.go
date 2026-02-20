@@ -26,12 +26,12 @@ type Aula struct {
 }
 
 type HorarioAula struct {
-	ID        int
-	AulaID    int
-	MateriaID int
-	TipoAula  string
-	Inicio    string
-	Fim       string
+	ID         int
+	AulaID     int
+	MateriaID  int
+	TipoAula   string
+	Inicio     string
+	DuracaoMin int
 }
 
 type Falta struct {
@@ -59,6 +59,7 @@ type HorarioView struct {
 	TipoAula    string
 	Inicio      string
 	Fim         string
+	DuracaoMin  int
 }
 
 type AulaAgenda struct {
@@ -132,6 +133,12 @@ func parseHHMM(v string) (int, bool) {
 	return h*60 + m, true
 }
 
+func formatHHMM(totalMin int) string {
+	h := (totalMin / 60) % 24
+	m := totalMin % 60
+	return fmt.Sprintf("%02d:%02d", h, m)
+}
+
 func (s *Store) addMateria(nome, professor string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -175,7 +182,7 @@ func (s *Store) aulaPorData(data time.Time) *Aula {
 	return nil
 }
 
-func (s *Store) addHorario(aulaID, materiaID int, tipo, inicio, fim string) (bool, string) {
+func (s *Store) addHorario(aulaID, materiaID int, tipo, inicio string, duracaoMin int) (bool, string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.findAula(aulaID) == nil || s.findMateria(materiaID) == nil {
@@ -184,23 +191,26 @@ func (s *Store) addHorario(aulaID, materiaID int, tipo, inicio, fim string) (boo
 	if tipo != "teorica" && tipo != "pratica" {
 		tipo = "teorica"
 	}
-	inicioMin, okI := parseHHMM(inicio)
-	fimMin, okF := parseHHMM(fim)
-	if !okI || !okF || fimMin <= inicioMin {
-		return false, "Horário inválido: informe início e fim válidos"
+	if duracaoMin <= 0 {
+		duracaoMin = 50
 	}
+	inicioMin, okI := parseHHMM(inicio)
+	if !okI {
+		return false, "Horário inválido: informe início válido"
+	}
+	fimMin := inicioMin + duracaoMin
 	for _, h := range s.horarios {
 		if h.AulaID != aulaID {
 			continue
 		}
 		i2, _ := parseHHMM(h.Inicio)
-		f2, _ := parseHHMM(h.Fim)
+		f2 := i2 + h.DuracaoMin
 		if inicioMin < f2 && fimMin > i2 {
 			return false, "Conflito: já existe aula nesse intervalo"
 		}
 	}
 	s.horarios = append(s.horarios, HorarioAula{
-		ID: s.nextHorarioID, AulaID: aulaID, MateriaID: materiaID, TipoAula: tipo, Inicio: inicio, Fim: fim,
+		ID: s.nextHorarioID, AulaID: aulaID, MateriaID: materiaID, TipoAula: tipo, Inicio: inicio, DuracaoMin: duracaoMin,
 	})
 	s.nextHorarioID++
 	return true, "Horário adicionado"
@@ -256,9 +266,12 @@ func (s *Store) pageData(msg string) PageData {
 		if m == nil || a == nil {
 			continue
 		}
+		inicioMin, _ := parseHHMM(h.Inicio)
+		fim := formatHHMM(inicioMin + h.DuracaoMin)
 		views = append(views, HorarioView{
 			ID: h.ID, AulaID: h.AulaID, AulaData: a.Data.Format("2006-01-02"),
-			MateriaNome: m.Nome, Professor: m.Professor, TipoAula: h.TipoAula, Inicio: h.Inicio, Fim: h.Fim,
+			MateriaNome: m.Nome, Professor: m.Professor, TipoAula: h.TipoAula,
+			Inicio: h.Inicio, Fim: fim, DuracaoMin: h.DuracaoMin,
 		})
 	}
 	sort.Slice(materias, func(i, j int) bool {
@@ -373,7 +386,8 @@ func main() {
 		}
 		aulaID, _ := strconv.Atoi(r.FormValue("aula_id"))
 		materiaID, _ := strconv.Atoi(r.FormValue("materia_id"))
-		ok, msg := store.addHorario(aulaID, materiaID, r.FormValue("tipo_aula"), r.FormValue("inicio"), r.FormValue("fim"))
+		duracaoMin, _ := strconv.Atoi(r.FormValue("duracao_min"))
+		ok, msg := store.addHorario(aulaID, materiaID, r.FormValue("tipo_aula"), r.FormValue("inicio"), duracaoMin)
 		if !ok && msg == "" {
 			msg = "Erro ao adicionar horário"
 		}

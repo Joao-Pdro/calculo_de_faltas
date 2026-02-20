@@ -70,7 +70,7 @@
             </select>
           </label>
           <label>Horário de início <input type="time" name="inicio" required /></label>
-          <label>Horário de fim <input type="time" name="fim" required /></label>
+          <label>Duração (min) <input type="number" name="duracao_min" min="1" value="50" /></label>
           <button type="submit">Adicionar horário</button>
         </form>
       </section>
@@ -85,7 +85,7 @@
           {{else}}
           <ul>
             {{range .Horarios}}
-            <li>{{.Inicio}}-{{.Fim}} | {{.MateriaNome}} - {{.Professor}} ({{.TipoAula}})</li>
+            <li>{{.Inicio}}-{{.Fim}} ({{.DuracaoMin}}min) | {{.MateriaNome}} - {{.Professor}} ({{.TipoAula}})</li>
             {{end}}
           </ul>
           {{end}}
@@ -101,7 +101,7 @@
             <select name="horario_id" required>
               <option value="">Selecione</option>
               {{range .Horarios}}
-              <option value="{{.ID}}">{{.AulaData}} {{.Inicio}}-{{.Fim}} | {{.MateriaNome}} - {{.Professor}} ({{.TipoAula}})</option>
+              <option value="{{.ID}}">{{.AulaData}} {{.Inicio}}-{{.Fim}} ({{.DuracaoMin}}min) | {{.MateriaNome}} - {{.Professor}} ({{.TipoAula}})</option>
               {{end}}
             </select>
           </label>
